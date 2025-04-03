@@ -4,6 +4,7 @@
 """
 import math
 import pickle
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -37,7 +38,7 @@ from project.real_data.config import STAT_SAVE_DIR
 #     plt.show()
 
 
-def train_statistic(episode_range, n_cols=5, name="loss"):
+def train_statistic(episode_range, n_cols=5, train_path=None, name="loss"):
     # 计算总episode数和需要的行数
     num_episodes = episode_range[1] - episode_range[0] + 1
     n_rows = math.ceil(num_episodes / n_cols)
@@ -53,7 +54,10 @@ def train_statistic(episode_range, n_cols=5, name="loss"):
     index = None
     # 遍历每个episode绘制损失曲线
     for index, episode in enumerate(range(episode_range[0], episode_range[1] + 1)):
-        episode_path = STAT_SAVE_DIR / str(episode)
+        if not train_path:
+            episode_path = STAT_SAVE_DIR / str(episode)
+        else:
+            episode_path = train_path / str(episode)
 
         try:
             # 加载损失数据
@@ -85,13 +89,16 @@ def train_statistic(episode_range, n_cols=5, name="loss"):
     plt.show()
 
 
-def train_all_statistic(episode_range, name="loss"):
+def train_all_statistic(episode_range, name="loss", train_path=None):
     # 计算总episode数和需要的行数
     num_episodes = episode_range[1] - episode_range[0] + 1
 
     loss_all_data = []
     for episode in range(episode_range[0], episode_range[1] + 1):
-        episode_path = STAT_SAVE_DIR / str(episode)
+        if not train_path:
+            episode_path = STAT_SAVE_DIR / str(episode)
+        else:
+            episode_path = train_path / str(episode)
         with open(episode_path / f"result_{name}.pkl", "rb") as f:
             loss_data = pickle.load(f)
         loss_all_data.extend(loss_data)
@@ -100,11 +107,15 @@ def train_all_statistic(episode_range, name="loss"):
         "loss": loss_all_data
     })
 
-    fig = px.line(df)
+    fig = px.line(
+        df,
+        title=f"Ep {episode_range[0]} - {episode_range[1]} 的 {name} 图"
+    )
+
     fig.show()
 
 
 if __name__ == '__main__':
     # train_statistic(9)
-    # train_statistic((0, 9), 3, "loss")
-    train_all_statistic((0, 149), "loss")
+    # train_statistic((0, 10), 3, "loss")
+    train_all_statistic((1, 19), "loss")

@@ -100,12 +100,12 @@ def statistic():
         "target": target
     })
 
-    low_reward_count = (df['reward'] < -60).sum()  # 使用矢量化计算更高效
+    low_reward_count = (df['reward'] < 0).sum()  # 使用矢量化计算更高效
     print(f"\n奖励值小于0的记录数量：{low_reward_count}")
 
 
 if __name__ == '__main__':
-    record(r"C:\Users\admi\Desktop\aaa\data\origin\25_0204-0226.csv")
-    # record()
+    # record(r"C:\Users\admi\Desktop\aaa\data\origin\25_0204-0226.csv")
+    record()
     # statistic()
     plot()

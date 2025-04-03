@@ -3,6 +3,8 @@
 # @File: test_statistic.py
 """
 import pickle
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -44,5 +46,26 @@ def test_action_statistic(start, end=None):
         fig.show()
 
 
+def test_action_value_statistic(start, end=None):
+    if end is None:
+        end = start
+    # 为了包含 end episode，这里将 end 加 1
+    end += 1
+
+    avg_action_value = []
+    for episode in range(start, end):
+        result_path = test_result_path / str(episode)
+
+        with open(result_path / "action_value.pkl", "rb") as f:
+            action_value = pickle.load(f)
+        avg_action_value.append(sum(action_value) / len(action_value))
+
+    plt.plot(avg_action_value)
+    plt.xlabel("Training epochs")
+    plt.ylabel("Average action value (Q)")
+    plt.show()
+
+
 if __name__ == '__main__':
-    test_action_statistic(0, 8)
+    test_action_statistic(19, 19)
+    # test_action_value_statistic(0, 19)
