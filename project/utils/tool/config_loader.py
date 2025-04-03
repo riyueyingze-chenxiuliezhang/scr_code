@@ -56,6 +56,14 @@ class ConfigDict:
             raise AttributeError(f"配置项 '{name}' 不存在")
         return ConfigDict(value) if isinstance(value, dict) else value
 
+    def to_dict(self) -> dict:
+        """递归转换为原生字典"""
+        return {
+            key: value.to_dict() if isinstance(value, ConfigDict) else
+            value if isinstance(value, list) else value
+            for key, value in self._data.items()
+        }
+
     def __repr__(self):
         return f"ConfigDict({self._data})"
 
@@ -68,14 +76,6 @@ class ConfigLoader(metaclass=ConfigMeta):
 
 
 if __name__ == '__main__':
-    # 示例访问测试
-    print("阀门配置项:", ConfigLoader)
+    ConfigLoader.config_paths = [r"C:\Users\admi\Desktop\aaa\project\experience_config\real_data_config\param_2_config.yaml"]
     # 假设配置中valve为字典，例如: valve: {port: 8080}
-    print("阀门端口:", ConfigLoader.valve.port)
-    # ConfigLoader.config_path = Path(r"C:\Users\admi\Desktop\aaa\project\utils\tool\config\config.yaml")
-    #
-    # class Test:
-    #     def __init__(self, config):
-    #         print(config.valve)
-    #
-    # Test(ConfigLoader)
+    print("阀门端口:", ConfigLoader.environment.state.to_dict())
