@@ -4,7 +4,8 @@
 """
 import numpy as np
 
-from project.real_data.config import ConfigLoader, Process
+from .process import Process
+from project.real_data.config import ConfigLoader
 from project.utils import ActionSpace
 
 
