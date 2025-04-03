@@ -4,7 +4,6 @@
 """
 from pathlib import Path
 
-from .process import Process
 from project.utils import ConfigLoader, ArgumentParser
 
 PROJECT_DIR = Path(__file__).parents[1]
@@ -28,6 +27,5 @@ print(f"当前加载配置文件 {ConfigLoader.config_paths}")
 
 __all__ = [
     "ConfigLoader",
-    "Process",
     "PROJECT_DIR", "MODEL_SAVE_DIR", "STAT_SAVE_DIR"
 ]

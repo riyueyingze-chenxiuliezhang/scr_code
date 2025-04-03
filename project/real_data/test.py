@@ -36,7 +36,8 @@ def test(episode):
         for _ in range(300):
             next_state, _, done, information = env.step()
 
-            action = actions[agent.select_action(state)]
+            action_index, action_value = agent.select_action(state)
+            action = actions[action_index]
             raw_data_row = information['raw_data_row']
 
             real_action = raw_data_row['焦炉煤气阀门开度']
@@ -44,6 +45,7 @@ def test(episode):
             real_outlet_c = raw_data_row['出口NO2浓度（折算）']
 
             data_recode.add_data("action", int(action))
+            data_recode.add_data("action_value", action_value)
             data_recode.add_data("real_action", int(real_action))
             data_recode.add_data("real_target", real_target)
             data_recode.add_data("real_outlet_c", real_outlet_c)
@@ -60,5 +62,5 @@ def test(episode):
 
 
 if __name__ == '__main__':
-    for e in range(5, 9):
+    for e in range(19, 20):
         test(e)

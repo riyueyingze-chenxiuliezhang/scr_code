@@ -25,7 +25,7 @@ class MinMaxProcessor(BaseDataProcessor):
                 if _max == _min:
                     normalized_data.append(0.0)
                 else:
-                    normalized_data.append((value - _min) / (_max - _min))
+                    normalized_data.append((value - _min) / (_max - _min) * self.process_scale)
             else:
                 normalized_data.append(value)
         return normalized_data

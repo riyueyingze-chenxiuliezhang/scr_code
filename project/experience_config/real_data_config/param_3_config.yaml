@@ -1,9 +1,9 @@
 # 该文件及其参数配置仅适配 real_data 项目下的使用
-name: "param_2"
+name: "param_3"
 
 # 数据文件路径
 # 该数据文件未经过异常处理，将动作归类于 8 到 30 步长为 2
-data_path: 'C:\Users\admi\Desktop\aaa\data\process\25_0322-0327_filter.csv'
+data_path: 'C:\Users\admi\Desktop\aaa\data\process\25_0322-0327_single_filter.csv'
 
 # 环境设定
 environment:
@@ -16,10 +16,12 @@ environment:
     init_data_index: 0          # 从第一行开始读取
     history_window: 679         # 存储最近679个浓度值 5.3s读一次，3600s=1h
 
-    scale: 35                   # 标准化的缩放系数 范围 (1 --> +∞)
+    scale: 1                   # 标准化的缩放系数 范围 (1 --> +∞)
     # 需要数据缩放的特征
     process:
       &common_state
+      - "焦炉煤气阀门开度"
+      - "指标"
       - "煤气压力1热风炉气动阀1前"
       - "GGH原烟气侧出口温度"
       - "CEM_脱硝入口烟气流量（工况）"
@@ -27,8 +29,6 @@ environment:
 
     # 需要的状态
     features:
-      - "焦炉煤气阀门开度"
-      - "指标"
       - *common_state
 
   action:
