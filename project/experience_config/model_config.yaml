@@ -1,0 +1,12 @@
+# 环境模型相关路径
+new_model:
+  torch_model_path: 'C:\Users\admi\Desktop\aaa\model\new\models\端对端_25_0204-0306.pth'
+  scaler_x_path: 'C:\Users\admi\Desktop\aaa\model\new\models\scalerx_25_0204-0306.pkl'
+  scaler_y_path: 'C:\Users\admi\Desktop\aaa\model\new\models\scalery_25_0204-0306.pkl'
+
+old_model:
+  torch_model_path: 'C:\Users\admi\Desktop\aaa\model\old\RF_NOx_Temp.pkl'
+  scaler_path: 'C:\Users\admi\Desktop\aaa\model\old\scaler.pkl'
+
+  # 老模型根据动作遍历出来的预测出口浓度表
+  model_predict_path: 'C:\Users\admi\Desktop\aaa\data\process\handle\old\model_predict.csv'
