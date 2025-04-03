@@ -63,7 +63,7 @@ class DQNImpl(BaseRLAlgorithm):
         elif config.name == "test":
             self.epsilon = config.epsilon
 
-            self.q_net = Net(state_dim, action_dim, self._hidden_layer).to(self.device)
+            self.q_net = Net(state_dim, action_dim, self._hidden_layer).to(self.device).eval()
         else:
             raise Exception(f"{config.name} 未期望的参数")
 

@@ -29,11 +29,13 @@ class DQNAgent(DQNAgentImpl):
     def select_action(self, state):
         if random.uniform(0, 1) < self._dqn.epsilon:
             action = random.randrange(0, self._action_dim)
+            action_value = None
         else:
             state = torch.from_numpy(state.reshape(1, -1)).type(torch.float32).to(self._dqn.device)
-            action_values = self._dqn.get_q_value(state)
-            action = action_values.max(1)[1].item()
-        return action
+            action_values = self._dqn.get_q_value(state).max(1)
+            action_value = action_values[0].item()
+            action = action_values[1].item()
+        return action, action_value
 
     def update_network(self):
         if len(self._replay_memory) < self._start_size:
