@@ -54,13 +54,16 @@ class Process:
                     temp_df["next_state"] = temp_df["next_state"].apply(ast.literal_eval)
                     return temp_df
                 else:
+                    print("未找到上一次生成的四元组，重新构建四元组...")
                     return self._build_and_save(temp_data_file)
 
             # 如果相关的配置参数变动 重新构建四元组
+            print("配置参数发生变更，重新构建四元组...")
             print(differences)
             return self._build_and_save(temp_data_file)
 
         # 如果未找到上一次的配置参数
+        print("未找到上一次的配置文件，重新构建四元组...")
         temp_config_file.parent.mkdir(exist_ok=True, parents=True)
         with open(temp_config_file, "w", encoding="utf-8") as f:
             yaml.safe_dump(config_dict, f, indent=2, allow_unicode=True, default_flow_style=False)

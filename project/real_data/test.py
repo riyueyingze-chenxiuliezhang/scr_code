@@ -62,5 +62,5 @@ def test(episode):
 
 
 if __name__ == '__main__':
-    for e in range(19, 20):
+    for e in range(31, 69):
         test(e)
