@@ -11,7 +11,7 @@ from project.utils.core import BaseAction
 
 class ActionSpace(BaseAction):
     def __init__(self, config):
-        super().__init__(config)
+        super().__init__()
 
         self.actions = np.arange(
             config.action_min,

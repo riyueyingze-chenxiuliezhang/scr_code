@@ -8,4 +8,4 @@ from ..interface import IRLAgent
 
 
 class BaseRLAgent(IRLAgent, ABC):
-    def __init__(self, config): pass
+    def __init__(self): pass

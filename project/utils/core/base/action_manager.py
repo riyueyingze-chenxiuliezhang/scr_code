@@ -8,4 +8,4 @@ from ..interface import IActionManager
 
 
 class BaseAction(IActionManager, ABC):
-    def __init__(self, config): pass
+    def __init__(self): pass

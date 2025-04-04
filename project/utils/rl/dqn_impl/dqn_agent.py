@@ -8,8 +8,8 @@ from project.utils.core import BaseRLAgent
 
 
 class DQNAgentImpl(BaseRLAgent):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self):
+        pass
 
     def select_action(self, _state):
         pass
