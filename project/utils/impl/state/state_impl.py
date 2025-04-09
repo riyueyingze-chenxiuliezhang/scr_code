@@ -22,7 +22,9 @@ class StateSpace(BaseState):
         self._config = config
 
         self._prev_action = None
+        self._prev_outlet_c = None
         self._curr_action = None
+        self._curr_outlet_c = None
         self._current_index = None
         self._history_window = None
 
@@ -30,17 +32,21 @@ class StateSpace(BaseState):
 
     def _build_state(self):
         row = self.current_data
-        self._curr_action = row['焦炉煤气阀门开度']
         features = OrderedDict()
         for key in self._state_features:
             if key == "焦炉煤气阀门开度":
+                self._curr_action = row[key]
                 features[key] = self._prev_action
+            elif key == "出口NO2浓度（折算）":
+                self._curr_outlet_c = row[key]
+                features[key] = self._prev_outlet_c
             else:
                 features[key] = row[key]
         return np.array(self._dp.get_normalized(features), dtype=np.float32)
 
     def reset(self):
         self._prev_action = self._config.prev_valve
+        self._prev_outlet_c = self._config.prev_outlet_c
         self._current_index = self._config.init_data_index
         self._history_window = deque(maxlen=self._config.history_window)
         return self._build_state()
@@ -48,6 +54,7 @@ class StateSpace(BaseState):
     def step(self):
         self._current_index += 1
         self._prev_action = self._curr_action
+        self._prev_outlet_c = self._curr_outlet_c
         return self._build_state()
 
     @property
