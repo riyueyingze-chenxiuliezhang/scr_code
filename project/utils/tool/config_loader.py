@@ -64,6 +64,9 @@ class ConfigDict:
             for key, value in self._data.items()
         }
 
+    def get(self, key, default=None):
+        return self._data.get(key, default)
+
     def __repr__(self):
         return f"ConfigDict({self._data})"
 
@@ -78,4 +81,4 @@ class ConfigLoader(metaclass=ConfigMeta):
 if __name__ == '__main__':
     ConfigLoader.config_paths = [r"C:\Users\admi\Desktop\aaa\project\experience_config\real_data_config\param_2_config.yaml"]
     # 假设配置中valve为字典，例如: valve: {port: 8080}
-    print("阀门端口:", ConfigLoader.environment.state.to_dict())
+    print("阀门端口:", ConfigLoader.environment.get("state", 0))
