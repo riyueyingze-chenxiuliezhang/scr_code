@@ -4,113 +4,75 @@
 
 整合 Double dqn、Dueling dqn、优先经验回放、NoisyNet
 """
-from typing import List
 
-import numpy as np
 import torch
-from torch import nn
-import torch.nn.functional as F
 
 from project.utils.core import BaseRLAlgorithm
-
-
-class Net(nn.Module):
-    def __init__(self, _input_size, _output_size, _hidden_layer: List[int] = None):
-        super(Net, self).__init__()
-
-        # 检查参数是否合法
-        _hidden_layer = _hidden_layer if _hidden_layer else [64]
-        assert isinstance(_hidden_layer, List), "隐藏层必须是一个列表"
-        assert all(isinstance(n, int) and n > 0 for n in _hidden_layer), "隐藏层维度需为正整数"
-
-        self.all_layers = [_input_size, *_hidden_layer, _output_size]
-        self.layers = nn.ModuleList()
-
-        for in_dim, out_dim in zip(self.all_layers[:-2], self.all_layers[1:-1]):
-            self.layers.append(nn.Sequential(
-                nn.Linear(in_dim, out_dim),
-                nn.BatchNorm1d(out_dim),
-                nn.ReLU()
-            ))
-        self.layers.append(nn.Linear(self.all_layers[-2], self.all_layers[-1]))
-
-    def forward(self, x):
-        for layer in self.layers[:-1]:
-            x = layer(x)
-        return self.layers[-1](x)
+from ..exp_replay import replay_memory
+from ..net_impl import dqn_net
 
 
 class DQNImpl(BaseRLAlgorithm):
+    _strategies = {}  # 策略注册表
+
     def __init__(self, state_dim, action_dim, config):
         super().__init__(config)
 
-        self._config = config
-        self.device = torch.device(config.device)
-        self._hidden_layer = config.hidden_layer
-        if config.name == "train":
-            self._count = 0
+        net_config = {
+            "input_size": state_dim,
+            "output_size": action_dim,
+            "hidden_layer": config.hidden_layer,
+            "net_name": config.net_name
+        }
+        sample_name = "pri" if config.get("sample_method", "base") == "pri" else "base"
+        predict_name = "dd" if config.get("dd", False) else "base"
+        update_name = "tau" if config.get("tau", 0) != 0 else "base"
+        train_name = sample_name
+
+        if self.config_name == "train":
+            self.count = 0
             self._lr = config.lr
             self.epsilon = config.epsilon_start
-            self._gamma = config.gamma
-            self._update_step = config.update_step
-            self._tau = config.tau
-            self._dd = config.dd
+            self.gamma = config.gamma
+            self.update_step = config.update_step
+            self.batch_size = config.batch_size
+            self.tau = config.tau
+            self.dd = config.dd
+            self.replay_memory = replay_memory(config.capacity, sample_name)
 
-            self.q_net = Net(state_dim, action_dim, self._hidden_layer).to(self.device)
-            self.target_q_net = Net(state_dim, action_dim, self._hidden_layer).to(self.device)
+            self.q_net = dqn_net(**net_config).to(self.device)
+            self.target_q_net = dqn_net(**net_config).to(self.device)
             self.target_q_net.load_state_dict(self.q_net.state_dict())
             self.optimizer = torch.optim.Adam(self.q_net.parameters(), lr=self._lr)
-        elif config.name == "test":
+        elif self.config_name == "test":
             self.epsilon = config.epsilon
 
-            self.q_net = Net(state_dim, action_dim, self._hidden_layer).to(self.device).eval()
+            self.q_net = dqn_net(**net_config).to(self.device).eval()
         else:
-            raise Exception(f"{config.name} 未期望的参数")
+            raise Exception(f"{self.config_name} 未期望的参数")
+
+        self._sample_func = self._strategies[sample_name](self).sample
+        self._predict_func = self._strategies[predict_name](self).predict
+        self._update_func = self._strategies[update_name](self).update
+        self._train_func = self._strategies[train_name](self).train
+
+    def sample(self):
+        """ 从经验池中采样 """
+        return self._sample_func()
+
+    def predict(self, states, actions, rewards, next_states, dones):
+        """ 预测 q 值 和 next_q 值 """
+        return self._predict_func(states, actions, rewards, next_states, dones)
 
     def update(self):
-        """更新神经网络"""
-        self._count += 1
-        if self._count % self._update_step == 0:
-            if self._tau == 0:
-                # 硬更新
-                self.target_q_net.load_state_dict(self.q_net.state_dict())
-            else:
-                # 软更新
-                for target_param, param in zip(self.target_q_net.parameters(), self.q_net.parameters()):
-                    target_param.data.copy_(self._tau * param.data + (1 - self._tau) * target_param)
-            # print(self.epsilon)
-        self.epsilon = self._update_epsilon(self._count)
+        """ 更新神经网络 """
+        self._update_func()
 
-    def train(self, transitions):
-        states = torch.from_numpy(np.array(transitions["states"])).type(torch.float).to(self.device)
-        actions = torch.tensor(transitions["actions"]).view(-1, 1).to(self.device)
-        rewards = torch.tensor(transitions["rewards"], dtype=torch.float).view(-1, 1).to(self.device)
-        next_states = torch.from_numpy(np.array(transitions["next_states"])).type(torch.float).to(self.device)
-        dones = torch.tensor(transitions["done"], dtype=torch.float).view(-1, 1).to(self.device)
+    def train(self):
+        return self._train_func()
 
-        q_value = self.q_net(states).gather(1, actions)
-        with torch.no_grad():
-            if not self._dd:
-                next_q_value = self.target_q_net(next_states).max(1)[0].view(-1, 1).detach()
-            else:
-                """
-                1. 用在线网络选择动作
-                2. 用目标网络评估 Q 值
-                """
-                next_actions = self.q_net(next_states).max(1)[1].view(-1, 1)
-                next_q_value = self.target_q_net(next_states).gather(1, next_actions).detach()
-            target_q_value = next_q_value * self._gamma * (1 - dones) + rewards
-
-        loss = F.mse_loss(q_value, target_q_value)
-        self.optimizer.zero_grad()
-        loss.backward()
-        # torch.nn.utils.clip_grad_norm_(self.q_net.parameters(), max_norm=1.0)
-        self.optimizer.step()
-
-        # 更新目标网路
-        self.update()
-
-        return loss
+    def add_experience(self, state, action, reward, next_state, done):
+        self.replay_memory.add(state, action, reward, next_state, done)
 
     def get_q_value(self, state):
         return self.q_net(state)
@@ -123,11 +85,23 @@ class DQNImpl(BaseRLAlgorithm):
 
     def load(self, model_path):
         checkpoint = torch.load(model_path)
-        if self._config.name == "train":
+        if self.config_name == "train":
             self.q_net.load_state_dict(checkpoint['model_state_dict'])
             self.target_q_net.load_state_dict(checkpoint['model_state_dict'])
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        elif self._config.name == "test":
+        elif self.config_name == "test":
             self.q_net.load_state_dict(checkpoint['model_state_dict'])
         else:
-            raise Exception(f"未期望的参数 {self._config.name}")
+            raise Exception(f"未期望的参数 {self.config_name}")
+
+    @classmethod
+    def register_strategy(cls, name):
+        def decorator(strategy_cls):
+            cls._strategies[name] = strategy_cls
+            return strategy_cls
+
+        return decorator
+
+    @property
+    def replay_memory_len(self):
+        return len(self.replay_memory)
