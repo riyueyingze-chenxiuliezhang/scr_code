@@ -4,6 +4,7 @@
 """
 from .dqn_algorithm import DQNImpl
 from .dqn_agent import DQNAgentImpl
+from ..dqn_strategy import *
 
 __all__ = [
     "DQNImpl",

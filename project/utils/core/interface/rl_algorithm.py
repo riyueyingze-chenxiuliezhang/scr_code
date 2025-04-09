@@ -10,7 +10,7 @@ class IRLAlgorithm(ABC):
     def update(self): pass
 
     @abstractmethod
-    def train(self, transitions): pass
+    def train(self): pass
 
     @abstractmethod
     def save(self, model_path): pass

@@ -118,4 +118,4 @@ def train_all_statistic(episode_range, name="loss", train_path=None):
 if __name__ == '__main__':
     # train_statistic(9)
     # train_statistic((0, 10), 3, "loss")
-    train_all_statistic((1, 69), "loss")
+    train_all_statistic((0, 0), "loss")

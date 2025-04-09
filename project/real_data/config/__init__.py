@@ -9,7 +9,8 @@ from project.utils import ConfigLoader, ArgumentParser
 PROJECT_DIR = Path(__file__).parents[1]
 
 parser = ArgumentParser(description="配置训练参数")
-parser.add_argument("--config", "-c", type=str, default="param_3_config.yaml", help="训练配置文件名")
+parser.add_argument("--config", "-c", type=str, default="param_1_config.yaml", help="训练配置文件名")
+parser.add_argument("--epochs", "-e", type=int, default=150, help="训练配置文件名")
 args = parser.parse_args()
 
 ConfigLoader.config_paths = [
@@ -26,6 +27,7 @@ STAT_SAVE_DIR.mkdir(exist_ok=True, parents=True)
 print(f"当前加载配置文件 {ConfigLoader.config_paths}")
 
 __all__ = [
+    "args",
     "ConfigLoader",
     "PROJECT_DIR", "MODEL_SAVE_DIR", "STAT_SAVE_DIR"
 ]

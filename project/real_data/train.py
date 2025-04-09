@@ -5,7 +5,7 @@
 from tqdm import tqdm
 
 from utils import TrainSCREnv, DQNAgent, DataRecorder
-from config import ConfigLoader, MODEL_SAVE_DIR, STAT_SAVE_DIR
+from config import args, ConfigLoader, MODEL_SAVE_DIR, STAT_SAVE_DIR
 
 env = TrainSCREnv()
 action_dim = env.action_dim
@@ -22,7 +22,7 @@ def train(episode):
     env.reset()
     epoch = 0
     process_done = False
-    progress_bar = tqdm(total=env.data_num, desc=f"Ep {episode} 训练")
+    progress_bar = tqdm(total=env.data_num, desc=f"Ep {episode} / {args.epochs - 1} 训练")
 
     while not process_done:
         epoch += 1
@@ -59,5 +59,5 @@ def train(episode):
 
 
 if __name__ == '__main__':
-    for e in range(150):
+    for e in range(args.epochs):
         train(e)

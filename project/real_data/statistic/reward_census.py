@@ -11,8 +11,8 @@ import plotly.express as px
 from tqdm import tqdm
 
 from project.utils import RewardManager, DataRecorder
+from project.utils.tool.draw_figure import draw_bar
 from project.real_data.config import ConfigLoader
-
 
 save_path = Path(__file__).parent / "result" / "reward"
 
@@ -100,12 +100,22 @@ def statistic():
         "target": target
     })
 
-    low_reward_count = (df['reward'] < 0).sum()  # 使用矢量化计算更高效
-    print(f"\n奖励值小于0的记录数量：{low_reward_count}")
+    # 统计条件
+    conditions = {
+        "raw": df.shape[0],
+        "reward < 0": (df['reward'] < 0).sum(),
+        "action <= 14": (df['action'] < 14).sum(),
+        "reward < 0 and \n action <= 14": ((df['reward'] < 0) & (df['action'] <= 14)).sum(),
+    }
+    categories = list(conditions.keys())
+    values = list(conditions.values())
+    draw_bar(categories, values)
+    # low_reward_count = condition.sum()
+    # print(f"统计结果：{low_reward_count}")
 
 
 if __name__ == '__main__':
-    # record(r"C:\Users\admi\Desktop\aaa\data\origin\25_0204-0226.csv")
+    # record(r"C:\Users\admi\Desktop\aaa\data\process\25_0204-0226_single_filter.csv")
     record()
     # statistic()
     plot()

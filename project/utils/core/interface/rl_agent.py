@@ -14,6 +14,9 @@ class IRLAgent(ABC):
     def update_network(self): pass
 
     @abstractmethod
+    def add_experience(self, state, action, reward, next_state, done): pass
+
+    @abstractmethod
     def save_network(self, dir_path, epoch): pass
 
     @abstractmethod

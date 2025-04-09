@@ -3,7 +3,6 @@
 # @File: process.py
 """
 import ast
-from pathlib import Path
 
 import pandas as pd
 import yaml
@@ -54,24 +53,25 @@ class Process:
                     temp_df["next_state"] = temp_df["next_state"].apply(ast.literal_eval)
                     return temp_df
                 else:
-                    print("未找到上一次生成的四元组，重新构建四元组...")
-                    return self._build_and_save(temp_data_file)
+                    print("未找到上一次生成的四元组，构建四元组...")
+                    return self._build_and_save(temp_data_file, temp_config_file, config_dict)
 
             # 如果相关的配置参数变动 重新构建四元组
             print("配置参数发生变更，重新构建四元组...")
             print(differences)
-            return self._build_and_save(temp_data_file)
+            return self._build_and_save(temp_data_file, temp_config_file, config_dict)
 
         # 如果未找到上一次的配置参数
         print("未找到上一次的配置文件，重新构建四元组...")
-        temp_config_file.parent.mkdir(exist_ok=True, parents=True)
-        with open(temp_config_file, "w", encoding="utf-8") as f:
-            yaml.safe_dump(config_dict, f, indent=2, allow_unicode=True, default_flow_style=False)
-        return self._build_and_save(temp_data_file)
+        return self._build_and_save(temp_data_file, temp_config_file, config_dict)
 
-    def _build_and_save(self, save_path):
+    def _build_and_save(self, save_data_path, save_config_file, config_dict):
+        save_config_file.parent.mkdir(exist_ok=True, parents=True)
         temp_df = self._build_trace()
-        temp_df.to_csv(save_path, index=False)
+        temp_df.to_csv(save_data_path, index=False)
+
+        with open(save_config_file, "w", encoding="utf-8") as f:
+            yaml.safe_dump(config_dict, f, indent=2, allow_unicode=True, default_flow_style=False)
         return temp_df
 
     def _build_trace(self):

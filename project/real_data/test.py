@@ -47,7 +47,7 @@ def test(episode):
             data_recode.add_data("action", int(action))
             data_recode.add_data("action_value", action_value)
             data_recode.add_data("real_action", int(real_action))
-            data_recode.add_data("real_target", real_target)
+            data_recode.add_data("real_target", int(real_target))
             data_recode.add_data("real_outlet_c", real_outlet_c)
 
             state = next_state
@@ -62,5 +62,5 @@ def test(episode):
 
 
 if __name__ == '__main__':
-    for e in range(31, 69):
+    for e in range(0, 16):
         test(e)

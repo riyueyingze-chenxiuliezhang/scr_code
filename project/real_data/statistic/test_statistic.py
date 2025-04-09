@@ -46,28 +46,29 @@ def test_action_statistic(start, end=None):
         fig.show()
 
 
-def test_action_value_statistic(start, end=None, name="action_value"):
+def test_avg_value_statistic(start, end=None, name="action_value"):
     if end is None:
         end = start
     # 为了包含 end episode，这里将 end 加 1
     end += 1
 
-    avg_action_value = []
+    avg_value = []
     for episode in range(start, end):
         result_path = test_result_path / str(episode)
 
         with open(result_path / f"{name}.pkl", "rb") as f:
             action_value = pickle.load(f)
-        avg_action_value.append(sum(action_value) / len(action_value))
+        avg_value.append(sum(action_value) / len(action_value))
 
-    print(avg_action_value)
-    plt.plot(avg_action_value)
+    # print(avg_value)
+    plt.plot(avg_value)
     plt.xlabel("Training epochs")
-    plt.ylabel("Average action value (Q)")
+    plt.ylabel(f"Average {' '.join(name.split('_'))}")
     plt.show()
 
 
 if __name__ == '__main__':
-    # test_action_statistic(30, 30)
-    test_action_value_statistic(30, 30, "action")
-    # test_action_value_statistic(0, 25, "real_action")
+    # test_action_statistic(16, 16)
+    test_avg_value_statistic(0, 9, "action")
+    # test_avg_value_statistic(0, 9, "action_value")
+    # test_avg_value_statistic(0, 16, "real_action")
