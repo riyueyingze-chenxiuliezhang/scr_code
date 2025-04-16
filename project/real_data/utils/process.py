@@ -9,8 +9,9 @@ import yaml
 from tqdm import tqdm
 
 from project.real_data.config import PROJECT_DIR
-from project.utils import MinMaxProcessor, StateSpace, RewardManager
+from project.utils import StateSpace, RewardManager
 from project.utils.tool.diff import deep_compare_dicts
+from project.utils.factory.processor import data_processor
 
 
 class Process:
@@ -19,7 +20,7 @@ class Process:
         self._config = config
 
         self._reward_calc = RewardManager(environment.reward)
-        self._dp = MinMaxProcessor(config)
+        self._dp = data_processor(environment)
         self._state_space = StateSpace(self._dp, environment.state)
 
         self._temp_data_path = PROJECT_DIR / "config" / self._config.name
@@ -32,7 +33,7 @@ class Process:
         根据配置参数的变动决定是否重新构建四元组
         """
         config_dict = {
-            "data_path": self._config.data_path,
+            "data": self._config.environment.data.to_dict(),
             "state": self._config.environment.state.to_dict(),
             "reward": self._config.environment.reward.to_dict()
         }
@@ -62,7 +63,7 @@ class Process:
             return self._build_and_save(temp_data_file, temp_config_file, config_dict)
 
         # 如果未找到上一次的配置参数
-        print("未找到上一次的配置文件，重新构建四元组...")
+        print("未找到上一次的配置文件，构建四元组...")
         return self._build_and_save(temp_data_file, temp_config_file, config_dict)
 
     def _build_and_save(self, save_data_path, save_config_file, config_dict):
@@ -78,16 +79,18 @@ class Process:
         progress_bar = tqdm(total=self.data_num, desc="构建轨迹")
 
         transitions = []
-        state = self._state_space.reset()
+        self._state_space.reset()
 
         while True:
-            data_row = self._state_space.current_data
-            real_outlet_c = data_row['出口NO2浓度（折算）']
-            target_outlet_c = data_row['指标']
+            # step 中先计数器加 1，然后获得状态，调用是必须先是 step，然后才能根据索引获取数据
+            state, next_state = self._state_space.step()
+
+            data_row, data_lag_row = self._state_space.current_data
+            real_outlet_c = data_lag_row['出口NO2浓度（折算）']
+            target_outlet_c = data_row['目标浓度']
 
             action = data_row['焦炉煤气阀门开度']
             reward = self._reward_calc(real_outlet_c, target_outlet_c)
-            next_state = self._state_space.step()
             done = self._state_space.is_done
 
             transitions.append({
@@ -98,7 +101,6 @@ class Process:
                 "done": done  # 是否终止
             })
 
-            state = next_state
             progress_bar.update(1)
 
             if done:

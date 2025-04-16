@@ -1,6 +1,8 @@
 """
 # @Time: 2025/3/26 14:07
 # @File: train.py
+
+动作连续性惩罚
 """
 from tqdm import tqdm
 
@@ -10,7 +12,10 @@ from config import args, ConfigLoader, MODEL_SAVE_DIR, STAT_SAVE_DIR
 env = TrainSCREnv()
 action_dim = env.action_dim
 state_dim = env.state_dim
-agent = DQNAgent(state_dim, action_dim, ConfigLoader.dqn.train)
+train_config = ConfigLoader.dqn.train
+agent = DQNAgent(state_dim, action_dim, train_config)
+if train_config.get("load_model", False):
+    agent.load_network(train_config.load_model)
 
 
 def train(episode):

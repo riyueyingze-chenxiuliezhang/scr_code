@@ -22,13 +22,18 @@ def record(data_path=None):
     data_record = DataRecorder(save_path, file_fmt="pkl")
 
     data = pd.read_csv(ConfigLoader.data_path if not data_path else data_path)
+    data_lag = data.shift(-60)
+    data_lag = data.dropna()
+
     progress_bar = tqdm(total=data.shape[0])
 
     for _, row in data.iterrows():
+        time = pd.to_datetime(row['时间'], format="%Y-%m-%d %H:%M:%S", errors='raise')
         action = row['焦炉煤气阀门开度']
-        target = row['指标']
+        target = row['目标浓度']
         outlet_c = row['出口NO2浓度（折算）']
         reward = r(outlet_c, target, 0, 0)
+        data_record.add_data("time", time.strftime(format="%Y-%m-%d %H:%M:%S"))
         data_record.add_data("reward", reward)
         data_record.add_data("action", action)
         data_record.add_data("target", target)
@@ -39,6 +44,9 @@ def record(data_path=None):
 
 
 def plot():
+    with open(save_path / "time.pkl", "rb") as f:
+        time = pickle.load(f)
+
     with open(save_path / "action.pkl", "rb") as f:
         action = pickle.load(f)
 
@@ -52,7 +60,7 @@ def plot():
         outlet_c = pickle.load(f)
 
     df = pd.DataFrame({
-        "index": np.arange(len(action)),
+        "index": time,
         "action": action,
         "reward": reward,
         "target": target,
@@ -115,7 +123,7 @@ def statistic():
 
 
 if __name__ == '__main__':
-    # record(r"C:\Users\admi\Desktop\aaa\data\process\25_0204-0226_single_filter.csv")
-    record()
-    # statistic()
-    plot()
+    # record(r"C:\Users\admi\Desktop\aaa\data\filter\25_0302-0310_single_filter.csv")
+    # record()
+    statistic()
+    # plot()
