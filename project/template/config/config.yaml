@@ -1,0 +1,61 @@
+# 环境模型相关路径
+torch_model_path: 'C:\Users\admi\Desktop\aaa\model\new\models\端对端_25_0204-0306.pth'
+scaler_x_path: 'C:\Users\admi\Desktop\aaa\model\new\models\scalerx_25_0204-0306.pkl'
+scaler_y_path: 'C:\Users\admi\Desktop\aaa\model\new\models\scalery_25_0204-0306.pkl'
+
+# 数据文件路径
+data_path: 'C:\Users\admi\Desktop\aaa\data\25_0204-0226.csv'
+
+# 阀门开度动作设定
+# 动作选取从 8 --> 30，步长为 2
+environment:
+  valve_min: 10
+  valve_max: 30
+  valve_step: 2
+
+  init_valve: 20                # 初始阀门开度
+  prev_valve: 14                # 初始上一次的阀门开度
+
+  emission_weight: 0.85         # 排放权重
+  valve_weight: 0.15            # 阀门开度权重
+
+  history_window: 1358          # 存储最近1358个浓度值 5.3s读一次，7200s=2h
+
+  init_data_index: 1
+
+  state:
+    process:
+      &common_state
+      - "煤气压力1热风炉气动阀1前"
+      - "GGH原烟气侧出口温度"
+      - "CEM_脱硝入口烟气流量（工况）"
+      - "入口NO2浓度（折算）"
+
+    features:
+      - "焦炉煤气阀门开度"
+      - *common_state
+
+
+dqn:
+
+
+  train:
+    name: "train"
+    <<: &common_dqn
+      hidden_layer: [ 64, 64 ]      # 每层隐藏层的大小
+      device: "cuda"                # device可选值 ["cuda", "cpu"]
+    epsilon_start: 1.0            # 开始的贪婪值
+    epsilon_end: 0.01             # 最小的贪婪值
+    epsilon_delay: 100000         # 贪婪缩放因子
+    capacity: 10000               # replay_memory容量
+    lr: 0.001                     # 学习率
+    gamma: 0.1                    # 折扣率
+    update_step: 300              # target 网络更新间隔
+    batch_size: 64                # 每次更新网络处理的批次大小
+    tau: 0                        # 软更新系数
+    dd: false                     # 是否使用 double DQN
+
+  test:
+    name: "test"
+    <<: *common_dqn
+    epsilon: 0.01           # 贪婪值

@@ -124,8 +124,8 @@ def test_avg_value_statistic(start, end=None, name="action_value"):
 
 
 if __name__ == '__main__':
-    # test_action_statistic(0, 10)
-    test_action_plot(10)
-    # test_avg_value_statistic(0, 10, "action")
-    # test_avg_value_statistic(0, 10, "action_value")
+    # test_action_statistic(0, 19)
+    test_action_plot(19)
+    # test_avg_value_statistic(0, 19, "action")
+    # test_avg_value_statistic(0, 19, "action_value")
     # test_avg_value_statistic(0, 10, "real_action")

@@ -13,9 +13,12 @@ old_model:
 
 
 
+# 任务研究
 # 1. 统计五分钟滞后的浓度
 #   - 五分钟之后 real_outlet_c 超出 target_outlet_c 且当前 action < real_action, 异常
 #   - 五分钟之后 real_outlet_c 小于 target_outlet_c 且当前 action > real_action, 异常
 # 2. 网络结构降低，统计上述结果
 # 3. 奖励修改
 # 4. 数据集分开测试
+#   - 出口浓度大于目标浓度
+#   - 出口浓度小于目标浓度

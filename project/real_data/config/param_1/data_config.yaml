@@ -1,0 +1,43 @@
+data:
+  data_path: C:\Users\admi\Desktop\scr_code\data\25_0302-0310_process.csv
+  processor_name: minmax
+reward:
+  c: 0
+  emission_weight: 0.85
+  k: 5
+  neg_clip: -50
+  pos_scale: 10
+  sigma: 3
+  valve_weight: 0.15
+state:
+  features:
+  - &id001
+    - 目标浓度
+    - 煤气压力1热风炉气动阀1前
+    - GGH原烟气侧出口温度
+    - CEM_脱硝入口烟气流量（工况）
+    - 入口NO2浓度（折算）
+    - 出口NO2浓度（折算）
+  fixed_max_min:
+    max:
+      CEM_脱硝入口烟气流量（工况）: 1852.08
+      GGH原烟气侧出口温度: 235.52
+      入口NO2浓度（折算）: 457.36
+      出口NO2浓度（折算）: 44.36
+      焦炉煤气阀门开度: 30
+      煤气压力1热风炉气动阀1前: 7.12
+      目标浓度: 35
+    min:
+      CEM_脱硝入口烟气流量（工况）: 1473.85
+      GGH原烟气侧出口温度: 176.83
+      入口NO2浓度（折算）: 62.77
+      出口NO2浓度（折算）: 9.62
+      焦炉煤气阀门开度: 8
+      煤气压力1热风炉气动阀1前: 3.45
+      目标浓度: 25
+  history_window: 679
+  init_data_index: -1
+  prev_outlet_c: 20
+  prev_valve: 11
+  process: *id001
+  scale: 1

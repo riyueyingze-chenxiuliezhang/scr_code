@@ -6,7 +6,7 @@ name: "param_1"
 environment:
   data:
     # 数据文件路径
-    data_path: 'C:\Users\admi\Desktop\aaa\data\process\25_0302-0310_process.csv'
+    data_path: 'C:\Users\admi\Desktop\scr_code\data\25_0302-0310_process.csv'
     processor_name: "minmax"      # 数据处理 可选择 ["minmax", "normal", "none"]
 
   state:
