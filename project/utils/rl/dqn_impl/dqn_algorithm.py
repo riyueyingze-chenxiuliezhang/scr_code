@@ -83,8 +83,8 @@ class DQNImpl(BaseRLAlgorithm):
             "optimizer_state_dict": self.optimizer.state_dict()
         }, model_path)
 
-    def load(self, model_path):
-        checkpoint = torch.load(model_path)
+    def load(self, model_file):
+        checkpoint = torch.load(model_file)
         if self.config_name == "train":
             self.q_net.load_state_dict(checkpoint['model_state_dict'])
             self.target_q_net.load_state_dict(checkpoint['model_state_dict'])

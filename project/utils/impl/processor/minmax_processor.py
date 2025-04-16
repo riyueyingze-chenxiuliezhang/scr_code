@@ -12,9 +12,13 @@ class MinMaxProcessor(BaseDataProcessor):
     def __init__(self, config):
         super().__init__(config)
 
-        # 计算最大最小值
-        self._max = self._raw_data[self._process_features].max()
-        self._min = self._raw_data[self._process_features].min()
+        if config.state.get("fixed_max_min", False):
+            self._max = config.state.fixed_max_min.max.to_dict()
+            self._min = config.state.fixed_max_min.min.to_dict()
+        else:
+            # 计算最大最小值
+            self._max = self._raw_data[self._process_features].max()
+            self._min = self._raw_data[self._process_features].min()
 
     def get_normalized(self, raw_features: dict) -> list[Any]:
         normalized_data = []

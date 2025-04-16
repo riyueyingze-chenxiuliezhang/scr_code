@@ -49,8 +49,8 @@ class DQNAgent(DQNAgentImpl):
         dir_path.mkdir(exist_ok=True, parents=True)
         self._dqn.save(dir_path / f"checkpoint_{epoch}.pth")
 
-    def load_network(self, dir_path: Path, _epoch):
-        self._dqn.load(dir_path / f"checkpoint_{_epoch}.pth")
+    def load_network(self, model_file: Path):
+        self._dqn.load(model_file)
 
 
 if __name__ == '__main__':

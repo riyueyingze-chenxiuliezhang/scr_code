@@ -31,25 +31,40 @@ class StateSpace(BaseState):
         self._state_features = self.flatten_list(self._config.features)
 
     def _build_state(self):
-        row = self.current_data
-        features = OrderedDict()
-        for key in self._state_features:
-            if key == "焦炉煤气阀门开度":
-                self._curr_action = row[key]
-                features[key] = self._prev_action
-            elif key == "出口NO2浓度（折算）":
-                self._curr_outlet_c = row[key]
-                features[key] = self._prev_outlet_c
-            else:
-                features[key] = row[key]
-        return np.array(self._dp.get_normalized(features), dtype=np.float32)
+        """
+        构建状态
+
+        Returns:
+            返回 当前状态，时间滞后的下一状态
+        """
+        def build_features(data):
+            # 构建按顺序排列的特征字典
+            features = OrderedDict()
+            for key in self._state_features:
+                if key == "焦炉煤气阀门开度":
+                    self._curr_action = data[key]
+                    features[key] = self._prev_action
+                # 当前的数据 "出口NO2浓度（折算）" 经过移位，已经是上一时刻的出口浓度
+                # elif key == "出口NO2浓度（折算）":
+                #     self._curr_outlet_c = data[key]
+                #     features[key] = self._prev_outlet_c
+                else:
+                    features[key] = data[key]
+            return features
+
+        row, row_lag = self.current_data
+        row_features = np.array(self._dp.get_normalized(build_features(row)), dtype=np.float32)
+        row_lag_features = np.array(self._dp.get_normalized(build_features(row_lag)), dtype=np.float32)
+        return row_features, row_lag_features
 
     def reset(self):
+        """
+        reset 只做初始化，不返回最初的状态
+        """
         self._prev_action = self._config.prev_valve
         self._prev_outlet_c = self._config.prev_outlet_c
         self._current_index = self._config.init_data_index
         self._history_window = deque(maxlen=self._config.history_window)
-        return self._build_state()
 
     def step(self):
         self._current_index += 1

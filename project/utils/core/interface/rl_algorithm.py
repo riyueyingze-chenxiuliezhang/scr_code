@@ -16,4 +16,4 @@ class IRLAlgorithm(ABC):
     def save(self, model_path): pass
 
     @abstractmethod
-    def load(self, model_path): pass
+    def load(self, model_file): pass
