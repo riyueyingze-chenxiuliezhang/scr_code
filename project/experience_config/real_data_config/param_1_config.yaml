@@ -1,12 +1,17 @@
 # 该文件及其参数配置仅适配 real_data 项目下的使用
 # 测试代码的运行参数
+
+# 说明：
+#     数据使用 3月2号 - 4月2号
+#     只使用dueling强化学习
+#     状态随时变更
 name: "param_1"
 
 # 环境设定
 environment:
   data:
     # 数据文件路径
-    data_path: 'C:\Users\admi\Desktop\scr_code\data\25_0302-0310_process.csv'
+    data_path: 'C:\Users\admi\Desktop\aaa\data\process\25_0302-0402_process.csv'
     processor_name: "minmax"      # 数据处理 可选择 ["minmax", "normal", "none"]
 
   state:
@@ -20,7 +25,6 @@ environment:
     # 需要数据缩放的特征
     process:
       &common_state
-      - "目标浓度"
       - "煤气压力1热风炉气动阀1前"
       - "GGH原烟气侧出口温度"
       - "CEM_脱硝入口烟气流量（工况）"
@@ -30,25 +34,6 @@ environment:
     # 需要的状态
     features:
       - *common_state
-
-    fixed_max_min:
-      max:
-        目标浓度: 35
-        煤气压力1热风炉气动阀1前: 7.12
-        GGH原烟气侧出口温度: 235.52
-        CEM_脱硝入口烟气流量（工况）: 1852.08
-        入口NO2浓度（折算）: 457.36
-        出口NO2浓度（折算）: 44.36
-        焦炉煤气阀门开度: 30
-
-      min:
-        目标浓度: 25
-        煤气压力1热风炉气动阀1前: 3.45
-        GGH原烟气侧出口温度: 176.83
-        CEM_脱硝入口烟气流量（工况）: 1473.85
-        入口NO2浓度（折算）: 62.77
-        出口NO2浓度（折算）: 9.62
-        焦炉煤气阀门开度: 8
 
   action:
     action_min: 8           # 阀门开度最小值
@@ -62,7 +47,7 @@ environment:
     neg_clip: -50          # 负向奖励阶段值
 
     sigma: 3                # 控制安全区奖励衰减速度，值越小对接近目标越敏感
-    k: 5                    # 超限惩罚强度，超限 1 单位的惩罚=安全区最大奖励的 k 倍
+    k: 2                    # 超限惩罚强度，超限 1 单位的惩罚=安全区最大奖励的 k 倍
     c: 0                    # 动作变化惩罚系数，抑制频繁调整（单步动作变化 ${action_step} 单位时，惩罚 $ {c * action_step}
 
 
@@ -85,11 +70,11 @@ dqn:
       net_name: "dueling"                         # 网络层可选择 ["mlp", "dueling"]
 
     # dqn 增强参数
-    tau: 0.05                                     # 软更新系数 （0: 不使用软更新）
-    dd: true                                      # 是否使用 double DQN
+    tau: 0                                     # 软更新系数 （0: 不使用软更新）
+    dd: false                                      # 是否使用 double DQN
     # 采样方式可选值 ["base", "pri"]
     # "pri"是基于比例的优先经验回放。 不在可选范围内自动学则"base"
-    sample_method: "pri"
+    sample_method: "base"
 
 
   test:
