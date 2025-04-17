@@ -56,25 +56,27 @@ class BaseDataProcessor(IDataProcessor, ABC):
     def _data_filter(self):
         """
         将数据按照 3σ 进行特征过滤，最后重置 dataframe 索引
+        过滤两次
         """
-        features = [
-            "煤气压力1热风炉气动阀1前",
-            "GGH原烟气侧出口温度",
-            "CEM_脱硝入口烟气流量（工况）",
-            "入口NO2浓度（折算）",
-            "出口NO2浓度（折算）"
-        ]
-        temp_df = self._raw_data[features].copy()
-        mean = temp_df.mean()
-        std = temp_df.std()
-        upper = mean + 3 * std
-        lower = mean - 3 * std
+        for _ in range(2):
+            features = [
+                "煤气压力1热风炉气动阀1前",
+                "GGH原烟气侧出口温度",
+                "CEM_脱硝入口烟气流量（工况）",
+                "入口NO2浓度（折算）",
+                "出口NO2浓度（折算）"
+            ]
+            temp_df = self._raw_data[features].copy()
+            mean = temp_df.mean()
+            std = temp_df.std()
+            upper = mean + 3 * std
+            lower = mean - 3 * std
 
-        filter_mask = ((temp_df >= lower) & (temp_df <= upper)).all(axis=1)
+            filter_mask = ((temp_df >= lower) & (temp_df <= upper)).all(axis=1)
 
-        # 同步过滤原始数据和滞后数据
-        self._raw_data = self._raw_data.loc[filter_mask].reset_index(drop=True)
-        self._time_lag_data = self._time_lag_data.loc[filter_mask].reset_index(drop=True)
+            # 同步过滤原始数据和滞后数据
+            self._raw_data = self._raw_data.loc[filter_mask].reset_index(drop=True)
+            self._time_lag_data = self._time_lag_data.loc[filter_mask].reset_index(drop=True)
 
     def _data_classify(self):
         condition_mask = self._raw_data['目标浓度'] == 25
